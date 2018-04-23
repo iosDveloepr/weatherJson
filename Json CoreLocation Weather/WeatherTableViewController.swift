@@ -40,12 +40,26 @@ class WeatherTableViewController: UITableViewController, UISearchBarDelegate {
                                 self.tableView.reloadData()
                             }
                         }
+                    }, errorHandling:{ (message) in
+                        if message != nil {
+                            DispatchQueue.main.async { [weak self] in
+                                self?.alertErrorMessage(title: "Some error", message: message!)
+                            }
+                        }
                     })
                 }
+            } else {
+               self.alertErrorMessage(title: "Networking problems", message: "Place find a natworking connection")
             }
         }
     }
     
+    private func alertErrorMessage(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let ok = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alert.addAction(ok)
+        present(alert, animated: true, completion: nil)
+    }
     
 
     // MARK: - Table view data source

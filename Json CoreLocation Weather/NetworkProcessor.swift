@@ -9,6 +9,8 @@
 import Foundation
 import CoreLocation
 
+typealias ErrorHandler = (_ msg: String?) -> Void
+
 class NetworkProcessor{
     
     private init() {}
@@ -16,15 +18,26 @@ class NetworkProcessor{
     
      let basePath = "https://api.darksky.net/forecast/ff488868004ccf5b4f044a8620226b22/"
     
-     func dowbloadJson(fromLoaction location: CLLocationCoordinate2D, completion: @escaping ([Weather]) -> () ) {
+    func dowbloadJson(fromLoaction location: CLLocationCoordinate2D, completion: @escaping ([Weather]) -> (), errorHandling: ErrorHandler?) {
+        
         
         let url = basePath + "\(location.latitude),\(location.longitude)"
         let urlRequest = URLRequest(url: URL(string: url)!)
         
         let task = URLSession.shared.dataTask(with: urlRequest) { (data, response, error) in
             
+            if error != nil {
+                print(error!.localizedDescription)
+                 errorHandling?(error?.localizedDescription)
+            } else {
+                errorHandling?(nil)
+            }
+            
+         
+            
             guard let data = data else { return }
             var forecastArray : [Weather] = []
+            
             
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String : Any] {
@@ -48,6 +61,8 @@ class NetworkProcessor{
         
         task.resume()
     }
+    
+    
     
     
 } // class
